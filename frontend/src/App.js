@@ -9,11 +9,12 @@ import LoyaltyProgram from './pages/LoyaltyProgram';
 import EventPromotion from './pages/EventPromotion';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
+import BusinessTypeSelection from './pages/BusinessTypeSelection';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#e63946', // Restaurant red
+      main: '#e63946', // Business red
     },
     secondary: {
       main: '#f1faee', // Cream
@@ -31,7 +32,8 @@ function App() {
       <Router>
         <Navbar />
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<BusinessTypeSelection />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/customer-acquisition" element={<CustomerAcquisition />} />
           <Route path="/loyalty" element={<LoyaltyProgram />} />
           <Route path="/events" element={<EventPromotion />} />

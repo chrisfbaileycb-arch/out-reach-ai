@@ -10,10 +10,19 @@ import {
   RadioGroup,
   FormControlLabel,
 } from '@mui/material';
-import { Restaurant, Build, ShoppingBag, Spa, LocalFlorist } from '@mui/icons-material';
+import {
+  Restaurant,
+  Healing,
+  HomeRepairService,
+  Storefront,
+  ContentCut,
+  Pets,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
-const BusinessTypeSelection = ({ onNext }) => {
+const BusinessTypeSelection = () => {
   const [businessType, setBusinessType] = useState('');
+  const navigate = useNavigate();
 
   const businessTypes = [
     {
@@ -25,32 +34,40 @@ const BusinessTypeSelection = ({ onNext }) => {
     {
       id: 'personal',
       name: 'Personal Services',
-      icon: <Spa />,
+      icon: <ContentCut />,
       description: 'Salons, tattoo parlors, spas, barbershops',
     },
     {
       id: 'home',
       name: 'Home Services',
-      icon: <Build />,
+      icon: <HomeRepairService />,
       description: 'Contractors, remodelers, auto repair, cleaning',
     },
     {
       id: 'retail',
       name: 'Retail',
-      icon: <ShoppingBag />,
+      icon: <Storefront />,
       description: 'Pet stores, specialty shops, boutiques',
     },
     {
       id: 'health',
       name: 'Health & Wellness',
-      icon: <LocalFlorist />,
+      icon: <Healing />,
       description: 'Alternative health, fitness, therapy',
+    },
+    {
+      id: 'pets',
+      name: 'Pet Services',
+      icon: <Pets />,
+      description: 'Groomers, trainers, pet stores, veterinarians',
     },
   ];
 
   const handleNext = () => {
     if (businessType) {
-      onNext(businessType);
+      // Store business type in localStorage for use throughout the app
+      localStorage.setItem('businessType', businessType);
+      navigate('/dashboard');
     }
   };
 

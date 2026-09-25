@@ -22,17 +22,25 @@ import {
   CalendarToday,
   Assignment,
   LocalOffer,
+  Restaurant,
+  ContentCut,
+  HomeRepairService,
+  Storefront,
+  Healing,
+  Pets,
 } from '@mui/icons-material';
 
-const DynamicDashboard = ({ businessType }) => {
-  const [stats, setStats] = useState({
+const DynamicDashboard = () => {
+  // Read synchronously so the first render already shows the right business type
+  const [businessType] = useState(() => localStorage.getItem('businessType') || '');
+  const [stats] = useState({
     newCustomers: 47,
     repeatCustomers: 156,
     upcomingEvents: 3,
     reviewsThisMonth: 28,
   });
 
-  const [recentActivity, setRecentActivity] = useState([
+  const [recentActivity] = useState([
     { id: 1, action: 'New customer campaign sent', time: '2 hours ago' },
     { id: 2, action: '12 appointments booked from email', time: '5 hours ago' },
     { id: 3, action: 'Seasonal promotion scheduled', time: '1 day ago' },
@@ -121,6 +129,22 @@ const DynamicDashboard = ({ businessType }) => {
             'New patient welcome sequence sent',
           ],
         };
+      case 'pets':
+        return {
+          statLabels: ['New Clients', 'Regulars', 'Appointments', 'Reviews'],
+          quickActions: [
+            'Create New Campaign',
+            'Grooming Reminders',
+            'Product Promotions',
+            'View Analytics',
+          ],
+          recentActivities: [
+            'Grooming reminder campaign sent',
+            '12 appointments booked',
+            'New pet food promotion scheduled',
+            'Pet photo contest announced',
+          ],
+        };
       default:
         return {
           statLabels: ['New Customers', 'Repeat Customers', 'Events', 'Reviews'],
@@ -162,18 +186,40 @@ const DynamicDashboard = ({ businessType }) => {
     }
   };
 
+  const getBusinessIcon = () => {
+    switch (businessType) {
+      case 'food': return <Restaurant />;
+      case 'personal': return <ContentCut />;
+      case 'home': return <HomeRepairService />;
+      case 'retail': return <Storefront />;
+      case 'health': return <Healing />;
+      case 'pets': return <Pets />;
+      default: return <Storefront />;
+    }
+  };
+
+  const getBusinessName = () => {
+    switch (businessType) {
+      case 'food': return 'Restaurant';
+      case 'personal': return 'Personal Services';
+      case 'home': return 'Home Services';
+      case 'retail': return 'Retail';
+      case 'health': return 'Health & Wellness';
+      case 'pets': return 'Pet Services';
+      default: return 'Business';
+    }
+  };
+
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">
-          {businessType === 'food' ? 'Restaurant' :
-           businessType === 'personal' ? 'Personal Services' :
-           businessType === 'home' ? 'Home Services' :
-           businessType === 'retail' ? 'Retail' :
-           businessType === 'health' ? 'Health & Wellness' :
-           'Business'} Dashboard
-        </Typography>
-        <Chip label={`Business Type: ${businessType}`} color="primary" variant="outlined" />
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {getBusinessIcon()}
+          <Typography variant="h4" sx={{ ml: 1 }}>
+            {getBusinessName()} Dashboard
+          </Typography>
+        </Box>
+        <Chip label={`Business Type: ${getBusinessName()}`} color="primary" variant="outlined" />
       </Box>
 
       <Grid container spacing={3}>
