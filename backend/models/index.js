@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const BUSINESS_TYPES = require('../config/businessTypes');
 
 // Business Schema
 const businessSchema = new mongoose.Schema({
@@ -8,7 +9,7 @@ const businessSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['food', 'personal', 'home', 'retail', 'health', 'pets'],
+    enum: BUSINESS_TYPES,
     required: true,
   },
   address: {

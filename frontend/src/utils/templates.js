@@ -1,5 +1,3 @@
-// templates.js
-
 // Personal Service Templates
 export const personalServiceTemplates = [
   {
@@ -132,32 +130,13 @@ export const petTemplates = [
   }
 ];
 
-// Get templates by business type
-export const getTemplatesByBusinessType = (businessType) => {
-  switch (businessType) {
-    case 'personal':
-      return personalServiceTemplates;
-    case 'home':
-      return homeServiceTemplates;
-    case 'retail':
-      return retailTemplates;
-    case 'food':
-      return foodServiceTemplates;
-    case 'health':
-      return healthTemplates;
-    case 'pets':
-      return petTemplates;
-    default:
-      return [];
-  }
+export const TEMPLATES_BY_TYPE = {
+  food: foodServiceTemplates,
+  personal: personalServiceTemplates,
+  home: homeServiceTemplates,
+  retail: retailTemplates,
+  health: healthTemplates,
+  pets: petTemplates,
 };
 
-export default {
-  personalServiceTemplates,
-  homeServiceTemplates,
-  retailTemplates,
-  foodServiceTemplates,
-  healthTemplates,
-  petTemplates,
-  getTemplatesByBusinessType,
-};
+export const getTemplatesByBusinessType = (businessType) => TEMPLATES_BY_TYPE[businessType] || [];

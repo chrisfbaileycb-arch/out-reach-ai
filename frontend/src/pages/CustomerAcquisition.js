@@ -1,12 +1,11 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import ComingSoon from '../components/ComingSoon';
 
-// PLACEHOLDER: the CustomerAcquisition page has not been built yet.
 const CustomerAcquisition = () => (
-  <Box sx={{ p: 3 }}>
-    <Typography variant="h4">Customer Acquisition</Typography>
-    <Typography color="text.secondary">Coming soon.</Typography>
-  </Box>
+  <ComingSoon
+    title="Customer Acquisition"
+    description="Build campaigns from your industry's message templates to reach new customers."
+  />
 );
 
 export default CustomerAcquisition;

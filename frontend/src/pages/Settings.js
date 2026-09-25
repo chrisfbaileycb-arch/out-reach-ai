@@ -1,12 +1,11 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import ComingSoon from '../components/ComingSoon';
 
-// PLACEHOLDER: the Settings page has not been built yet.
 const Settings = () => (
-  <Box sx={{ p: 3 }}>
-    <Typography variant="h4">Settings</Typography>
-    <Typography color="text.secondary">Coming soon.</Typography>
-  </Box>
+  <ComingSoon
+    title="Settings"
+    description="Manage your business profile, contact details and account."
+  />
 );
 
 export default Settings;

@@ -32,6 +32,7 @@ test('register hashes the password, normalizes email and returns a valid token',
   expect(jwt.verify(res.body.token, 'test-secret').userId).toBe('1');
   expect(users[0].email).toBe('ada@example.com');
   expect(users[0].password).not.toBe(valid.password);
+  expect(res.body.user).toEqual({ id: '1', firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com' });
 });
 
 test('duplicate email in a different case is rejected', async () => {
@@ -39,7 +40,9 @@ test('duplicate email in a different case is rejected', async () => {
 });
 
 test('login is case-insensitive on email and rejects wrong passwords', async () => {
-  expect((await login({ email: 'ADA@example.com', password: 'longenough' })).status).toBe(200);
+  const res = await login({ email: 'ADA@example.com', password: 'longenough' });
+  expect(res.status).toBe(200);
+  expect(res.body.user).not.toHaveProperty('password');
   expect((await login({ email: 'ada@example.com', password: 'wrongpass1' })).status).toBe(400);
 });
 
@@ -49,3 +52,25 @@ test('register and login validate input', async () => {
   expect((await register({ ...valid, email: 'a@b.com', password: 'short' })).status).toBe(400);
   expect((await login({})).status).toBe(400);
 });
+
+test('malformed JSON gets a JSON 400', async () => {
+  const res = await request(app)
+    .post('/api/auth/login')
+    .set('Content-Type', 'application/json')
+    .send('{"email":');
+  expect(res.status).toBe(400);
+  expect(res.body).toEqual({ message: 'Bad request' });
+});
+
+test('unknown API paths get a JSON 404', async () => {
+  const res = await request(app).get('/api/nope');
+  expect(res.status).toBe(404);
+  expect(res.body).toEqual({ message: 'Not found' });
+});
+
+test.each(['/api/business', '/api/campaigns', '/api/customers', '/api/analytics'])(
+  'placeholder %s returns 501',
+  async (path) => {
+    expect((await request(app).get(path)).status).toBe(501);
+  }
+);

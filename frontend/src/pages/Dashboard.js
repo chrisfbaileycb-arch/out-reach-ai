@@ -1,2 +1,15 @@
-// The /dashboard route renders the business-type-aware dashboard.
-export { default } from '../components/DynamicDashboard';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import DynamicDashboard from '../components/DynamicDashboard';
+import { useBusinessType } from '../utils/BusinessTypeContext';
+
+// The dashboard only makes sense once a business type has been chosen
+const Dashboard = () => {
+  const { businessType } = useBusinessType();
+  if (!businessType) {
+    return <Navigate to="/" replace />;
+  }
+  return <DynamicDashboard businessType={businessType} />;
+};
+
+export default Dashboard;

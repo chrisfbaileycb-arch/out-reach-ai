@@ -1,12 +1,11 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import ComingSoon from '../components/ComingSoon';
 
-// PLACEHOLDER: the Analytics page has not been built yet.
 const Analytics = () => (
-  <Box sx={{ p: 3 }}>
-    <Typography variant="h4">Analytics</Typography>
-    <Typography color="text.secondary">Coming soon.</Typography>
-  </Box>
+  <ComingSoon
+    title="Analytics"
+    description="See how your campaigns perform: sends, opens, clicks and bookings."
+  />
 );
 
 export default Analytics;

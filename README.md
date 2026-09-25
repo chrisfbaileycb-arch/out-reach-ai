@@ -19,13 +19,17 @@ npm start
 
 For production, run `npm run build` in `frontend/` and start the backend with `NODE_ENV=production`; it serves `frontend/build`.
 
-Run the backend tests with `npm test` in `backend/`. They use an in-memory stand-in for the database, so MongoDB isn't needed.
+Checks (all run in CI on every push):
+
+- `frontend/`: `npm run lint`, `npm test`, `npm run build`
+- `backend/`: `npm test` (uses an in-memory stand-in for the database, so MongoDB isn't needed)
 
 ## Layout
 
 ```
 backend/
 ├── server.js                 # Express app, Mongo connection, route mounting
+├── config/businessTypes.js   # business type ids (must match the frontend registry)
 ├── models/index.js           # Business, Customer, Campaign, User schemas
 ├── routes/
 │   ├── auth.js               # POST /api/auth/register, /api/auth/login
@@ -33,16 +37,21 @@ backend/
 └── __tests__/auth.test.js
 
 frontend/src/
-├── App.js                    # theme + routes
+├── App.js                    # routes
+├── theme.js
 ├── components/
 │   ├── Navbar.js
-│   └── DynamicDashboard.js   # dashboard content adapts to the chosen business type
+│   ├── DynamicDashboard.js   # dashboard for the chosen business type
+│   └── ComingSoon.js         # shared layout for unbuilt pages
 ├── pages/
-│   ├── BusinessTypeSelection.js   # "/" onboarding, stores type in localStorage
-│   ├── Dashboard.js               # "/dashboard" -> DynamicDashboard
+│   ├── BusinessTypeSelection.js   # "/" onboarding
+│   ├── Dashboard.js               # "/dashboard"; sends you to "/" if no type is chosen
 │   └── CustomerAcquisition.js, LoyaltyProgram.js, EventPromotion.js,
-│       Analytics.js, Settings.js  # PLACEHOLDERS
-└── utils/templates.js        # outreach message templates per business type
+│       Analytics.js, Settings.js  # PLACEHOLDERS (ComingSoon)
+└── utils/
+    ├── businessTypes.js      # single source of truth for business types
+    ├── BusinessTypeContext.js
+    └── templates.js          # outreach message templates per business type
 ```
 
-Files marked PLACEHOLDER are stubs for features that haven't been built yet.
+Files marked PLACEHOLDER are stubs for features that haven't been built yet. See `CLAUDE.md` for the project's conventions.

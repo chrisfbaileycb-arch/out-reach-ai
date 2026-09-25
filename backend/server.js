@@ -40,6 +40,11 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'Server is running' });
 });
 
+// Unknown API paths get a JSON 404 rather than the frontend's index.html
+app.use('/api', (req, res) => {
+  res.status(404).json({ message: 'Not found' });
+});
+
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../frontend/build')));
@@ -48,6 +53,14 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
   });
 }
+
+// Malformed JSON bodies and other unhandled errors get a JSON response
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  const status = err.status || err.statusCode || 500;
+  if (status >= 500) console.error(err);
+  res.status(status).json({ message: status >= 500 ? 'Server error' : 'Bad request' });
+});
 
 // Connect to MongoDB, then start accepting requests
 if (require.main === module) {

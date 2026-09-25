@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Grid,
   Card,
@@ -20,271 +21,110 @@ import {
   Star,
   Add,
   CalendarToday,
-  Assignment,
   LocalOffer,
-  Restaurant,
-  ContentCut,
-  HomeRepairService,
-  Storefront,
-  Healing,
-  Pets,
+  Assessment,
 } from '@mui/icons-material';
 
-const DynamicDashboard = () => {
-  // Read synchronously so the first render already shows the right business type
-  const [businessType] = useState(() => localStorage.getItem('businessType') || '');
-  const [stats] = useState({
-    newCustomers: 47,
-    repeatCustomers: 156,
-    upcomingEvents: 3,
-    reviewsThisMonth: 28,
-  });
+// Placeholder figures until customer data comes from the backend
+const SAMPLE_STAT_VALUES = [47, 156, 3, 28];
+const SAMPLE_ACTIVITY_TIMES = ['2 hours ago', '5 hours ago', '1 day ago', '2 days ago'];
 
-  const [recentActivity] = useState([
-    { id: 1, action: 'New customer campaign sent', time: '2 hours ago' },
-    { id: 2, action: '12 appointments booked from email', time: '5 hours ago' },
-    { id: 3, action: 'Seasonal promotion scheduled', time: '1 day ago' },
-    { id: 4, action: 'Review request sent to 23 customers', time: '2 days ago' },
-  ]);
+const STAT_ICONS = [People, TrendingUp, Event, Star];
 
-  const getBusinessSpecificContent = () => {
-    switch (businessType) {
-      case 'food':
-        return {
-          statLabels: ['New Diners', 'Regulars', 'Events', 'Reviews'],
-          quickActions: [
-            'Create New Campaign',
-            'Promote Special Menu',
-            'Request Reviews',
-            'View Analytics',
-          ],
-          recentActivities: [
-            'New customer campaign sent',
-            '12 reservations from email campaign',
-            'Wine tasting promotion scheduled',
-            'New review request sent',
-          ],
-        };
-      case 'personal':
-        return {
-          statLabels: ['New Clients', 'Return Clients', 'Appointments', 'Reviews'],
-          quickActions: [
-            'Create New Campaign',
-            'Schedule Reminders',
-            'Promote New Services',
-            'View Analytics',
-          ],
-          recentActivities: [
-            'Appointment reminder campaign sent',
-            '15 rebookings from outreach',
-            'New service promotion scheduled',
-            'Portfolio showcase sent to prospects',
-          ],
-        };
-      case 'home':
-        return {
-          statLabels: ['New Jobs', 'Repeat Clients', 'Quotes', 'Reviews'],
-          quickActions: [
-            'Create New Campaign',
-            'Seasonal Maintenance',
-            'Quote Follow-ups',
-            'View Analytics',
-          ],
-          recentActivities: [
-            'Seasonal maintenance reminders sent',
-            '8 quotes requested from campaign',
-            'Project showcase sent to neighborhood',
-            'Completion follow-ups scheduled',
-          ],
-        };
-      case 'retail':
-        return {
-          statLabels: ['New Shoppers', 'Regulars', 'Promotions', 'Reviews'],
-          quickActions: [
-            'Create New Campaign',
-            'Promote Products',
-            'Restock Reminders',
-            'View Analytics',
-          ],
-          recentActivities: [
-            'New product announcement sent',
-            '23 click-throughs to products',
-            'Seasonal sale promotion scheduled',
-            'Loyalty program invites sent',
-          ],
-        };
-      case 'health':
-        return {
-          statLabels: ['New Patients', 'Returning', 'Sessions', 'Reviews'],
-          quickActions: [
-            'Create New Campaign',
-            'Appointment Reminders',
-            'Wellness Tips',
-            'View Analytics',
-          ],
-          recentActivities: [
-            'Wellness newsletter sent',
-            '17 appointments booked',
-            'Seasonal health tips scheduled',
-            'New patient welcome sequence sent',
-          ],
-        };
-      case 'pets':
-        return {
-          statLabels: ['New Clients', 'Regulars', 'Appointments', 'Reviews'],
-          quickActions: [
-            'Create New Campaign',
-            'Grooming Reminders',
-            'Product Promotions',
-            'View Analytics',
-          ],
-          recentActivities: [
-            'Grooming reminder campaign sent',
-            '12 appointments booked',
-            'New pet food promotion scheduled',
-            'Pet photo contest announced',
-          ],
-        };
-      default:
-        return {
-          statLabels: ['New Customers', 'Repeat Customers', 'Events', 'Reviews'],
-          quickActions: [
-            'Create New Campaign',
-            'Schedule Promotion',
-            'Request Reviews',
-            'View Analytics',
-          ],
-          recentActivities: [
-            'New customer campaign sent',
-            '12 conversions from campaign',
-            'Promotion scheduled',
-            'Review request sent',
-          ],
-        };
-    }
-  };
+const DynamicDashboard = ({ businessType }) => {
+  const { name, dashboardTitle, icon: BusinessIcon, statLabels, recentActivity } = businessType;
 
-  const businessContent = getBusinessSpecificContent();
-
-  const getIconForStat = (index) => {
-    switch (index) {
-      case 0: return <People color="primary" sx={{ fontSize: 40, mr: 2 }} />;
-      case 1: return <TrendingUp color="primary" sx={{ fontSize: 40, mr: 2 }} />;
-      case 2: return <Event color="primary" sx={{ fontSize: 40, mr: 2 }} />;
-      case 3: return <Star color="primary" sx={{ fontSize: 40, mr: 2 }} />;
-      default: return <People color="primary" sx={{ fontSize: 40, mr: 2 }} />;
-    }
-  };
-
-  const getIconForAction = (index) => {
-    switch (index) {
-      case 0: return <Add />;
-      case 1: return <CalendarToday />;
-      case 2: return <LocalOffer />;
-      case 3: return <Assignment />;
-      default: return <Add />;
-    }
-  };
-
-  const getBusinessIcon = () => {
-    switch (businessType) {
-      case 'food': return <Restaurant />;
-      case 'personal': return <ContentCut />;
-      case 'home': return <HomeRepairService />;
-      case 'retail': return <Storefront />;
-      case 'health': return <Healing />;
-      case 'pets': return <Pets />;
-      default: return <Storefront />;
-    }
-  };
-
-  const getBusinessName = () => {
-    switch (businessType) {
-      case 'food': return 'Restaurant';
-      case 'personal': return 'Personal Services';
-      case 'home': return 'Home Services';
-      case 'retail': return 'Retail';
-      case 'health': return 'Health & Wellness';
-      case 'pets': return 'Pet Services';
-      default: return 'Business';
-    }
-  };
+  // Every type starts with "create" and ends with "analytics"; the middle two are type-specific
+  const quickActions = [
+    { label: 'Create New Campaign', path: '/customer-acquisition', icon: Add },
+    { ...businessType.quickActions[0], icon: CalendarToday },
+    { ...businessType.quickActions[1], icon: LocalOffer },
+    { label: 'View Analytics', path: '/analytics', icon: Assessment },
+  ];
 
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 1,
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {getBusinessIcon()}
-          <Typography variant="h4" sx={{ ml: 1 }}>
-            {getBusinessName()} Dashboard
+          <BusinessIcon fontSize="large" color="primary" />
+          <Typography variant="h4" component="h1" sx={{ ml: 1 }}>
+            {dashboardTitle} Dashboard
           </Typography>
         </Box>
-        <Chip label={`Business Type: ${getBusinessName()}`} color="primary" variant="outlined" />
+        <Chip label={name} color="primary" variant="outlined" />
       </Box>
 
       <Grid container spacing={3}>
-        {/* Stats Cards */}
-        {[0, 1, 2, 3].map((index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card>
-              <CardContent>
-                <Box display="flex" alignItems="center">
-                  {getIconForStat(index)}
+        {statLabels.map((label, index) => {
+          const StatIcon = STAT_ICONS[index];
+          return (
+            <Grid item xs={12} sm={6} md={3} key={label}>
+              <Card>
+                <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
+                  <StatIcon color="primary" sx={{ fontSize: 40, mr: 2 }} />
                   <Box>
-                    <Typography color="textSecondary" gutterBottom>
-                      {businessContent.statLabels[index]}
+                    <Typography color="text.secondary" gutterBottom>
+                      {label}
                     </Typography>
-                    <Typography variant="h5">
-                      {Object.values(stats)[index]}
-                    </Typography>
+                    <Typography variant="h5">{SAMPLE_STAT_VALUES[index]}</Typography>
                   </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
 
-        {/* Quick Actions */}
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" component="h2" gutterBottom>
               Quick Actions
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            {businessContent.quickActions.map((action, index) => (
+            {quickActions.map(({ label, path, icon: ActionIcon }, index) => (
               <Button
-                key={index}
-                variant={index === 0 ? "contained" : "outlined"}
+                key={label}
+                component={RouterLink}
+                to={path}
+                variant={index === 0 ? 'contained' : 'outlined'}
                 fullWidth
-                startIcon={getIconForAction(index)}
+                startIcon={<ActionIcon />}
                 sx={{ mb: 1 }}
               >
-                {action}
+                {label}
               </Button>
             ))}
           </Paper>
         </Grid>
 
-        {/* Recent Activity */}
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" component="h2" gutterBottom>
               Recent Activity
             </Typography>
             <Divider sx={{ mb: 2 }} />
             <List>
-              {businessContent.recentActivities.map((activity, index) => (
-                <ListItem key={index} divider={index < businessContent.recentActivities.length - 1}>
-                  <ListItemText
-                    primary={activity}
-                    secondary={recentActivity[index]?.time || 'Recently'}
-                  />
+              {recentActivity.map((activity, index) => (
+                <ListItem key={activity} divider={index < recentActivity.length - 1}>
+                  <ListItemText primary={activity} secondary={SAMPLE_ACTIVITY_TIMES[index]} />
                 </ListItem>
               ))}
             </List>
           </Paper>
         </Grid>
       </Grid>
+
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+        Showing sample data. Real figures will appear once your customer list is connected.
+      </Typography>
     </Box>
   );
 };

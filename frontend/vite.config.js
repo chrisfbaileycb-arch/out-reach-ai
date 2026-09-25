@@ -10,4 +10,8 @@ export default defineConfig({
   server: { proxy: { '/api': 'http://localhost:5000' } },
   esbuild: { loader: 'jsx', include: /src\/.*\.js$/, exclude: [] },
   optimizeDeps: { esbuildOptions: { loader: { '.js': 'jsx' } } },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
+  },
 });

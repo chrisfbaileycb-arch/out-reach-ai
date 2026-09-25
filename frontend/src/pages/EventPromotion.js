@@ -1,12 +1,11 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import ComingSoon from '../components/ComingSoon';
 
-// PLACEHOLDER: the EventPromotion page has not been built yet.
 const EventPromotion = () => (
-  <Box sx={{ p: 3 }}>
-    <Typography variant="h4">Event Promotion</Typography>
-    <Typography color="text.secondary">Coming soon.</Typography>
-  </Box>
+  <ComingSoon
+    title="Event Promotion"
+    description="Announce events, seasonal specials and new products to your customer list."
+  />
 );
 
 export default EventPromotion;

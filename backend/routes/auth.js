@@ -1,4 +1,3 @@
-// auth.js
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -11,6 +10,15 @@ const normalizeEmail = (email) =>
 
 const signToken = (user) =>
   jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+// The user fields safe to send to the client (never the password hash)
+const toPublicUser = (user) => ({
+  id: user._id,
+  firstName: user.firstName,
+  lastName: user.lastName,
+  email: user.email,
+  business: user.business,
+});
 
 // Register
 router.post('/register', async (req, res) => {
@@ -53,12 +61,7 @@ router.post('/register', async (req, res) => {
     
     res.status(201).json({
       token,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-      },
+      user: toPublicUser(user),
     });
   } catch (error) {
     console.error(error);
@@ -93,13 +96,7 @@ router.post('/login', async (req, res) => {
     
     res.json({
       token,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        business: user.business,
-      },
+      user: toPublicUser(user),
     });
   } catch (error) {
     console.error(error);

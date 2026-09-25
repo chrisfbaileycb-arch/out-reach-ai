@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -8,120 +9,115 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Avatar,
+  ListItemIcon,
+  ListItemText,
+  Divider,
 } from '@mui/material';
 import {
-  AccountCircle,
+  Menu as MenuIcon,
   Dashboard,
   People,
   Star,
   Event,
   Assessment,
   Settings,
+  SwapHoriz,
 } from '@mui/icons-material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useBusinessType } from '../utils/BusinessTypeContext';
+
+const NAV_ITEMS = [
+  { label: 'Dashboard', icon: Dashboard, path: '/dashboard' },
+  { label: 'Customer Acquisition', icon: People, path: '/customer-acquisition' },
+  { label: 'Loyalty Program', icon: Star, path: '/loyalty' },
+  { label: 'Events', icon: Event, path: '/events' },
+  { label: 'Analytics', icon: Assessment, path: '/analytics' },
+  { label: 'Settings', icon: Settings, path: '/settings' },
+];
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { pathname } = useLocation();
+  const { businessType } = useBusinessType();
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
+  const goTo = (path) => {
     setAnchorEl(null);
-  };
-
-  const handleNavigation = (path) => {
     navigate(path);
-    handleClose();
   };
-
-  const menuItems = [
-    { label: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { label: 'Customer Acquisition', icon: <People />, path: '/customer-acquisition' },
-    { label: 'Loyalty Program', icon: <Star />, path: '/loyalty' },
-    { label: 'Events', icon: <Event />, path: '/events' },
-    { label: 'Analytics', icon: <Assessment />, path: '/analytics' },
-    { label: 'Settings', icon: <Settings />, path: '/settings' },
-  ];
 
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography
+          variant="h6"
+          component={RouterLink}
+          to={businessType ? '/dashboard' : '/'}
+          sx={{ flexGrow: 1, color: 'inherit', textDecoration: 'none' }}
+        >
           LocalBoost
         </Typography>
-        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-          {menuItems.map((item) => (
+
+        {/* Inline links on wide screens; the menu covers them on small screens */}
+        <Box component="nav" sx={{ display: { xs: 'none', lg: 'flex' } }}>
+          {NAV_ITEMS.map(({ label, icon: Icon, path }) => (
             <Button
-              key={item.path}
+              key={path}
+              component={RouterLink}
+              to={path}
               color="inherit"
-              startIcon={item.icon}
-              onClick={() => handleNavigation(item.path)}
+              startIcon={<Icon />}
+              aria-current={pathname === path ? 'page' : undefined}
               sx={{
-                backgroundColor: location.pathname === item.path ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                borderRadius: 1,
                 mr: 1,
+                backgroundColor: pathname === path ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
               }}
             >
-              {item.label}
+              {label}
             </Button>
           ))}
         </Box>
-        <Box sx={{ ml: 2 }}>
-          <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleMenu}
-            color="inherit"
-          >
-            <Avatar sx={{ width: 32, height: 32 }}>
-              <AccountCircle />
-            </Avatar>
-          </IconButton>
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-          >
-            {menuItems.map((item) => (
-              <MenuItem
-                key={item.path}
-                onClick={() => handleNavigation(item.path)}
-                selected={location.pathname === item.path}
-              >
-                {item.icon}
-                <Typography sx={{ ml: 1 }}>{item.label}</Typography>
-              </MenuItem>
-            ))}
-            <MenuItem onClick={handleClose}>
-              <AccountCircle />
-              <Typography sx={{ ml: 1 }}>Profile</Typography>
+
+        <IconButton
+          color="inherit"
+          aria-label="Open menu"
+          aria-controls={anchorEl ? 'app-menu' : undefined}
+          aria-haspopup="true"
+          onClick={(event) => setAnchorEl(event.currentTarget)}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Menu
+          id="app-menu"
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          {NAV_ITEMS.map(({ label, icon: Icon, path }) => (
+            <MenuItem
+              key={path}
+              selected={pathname === path}
+              onClick={() => goTo(path)}
+              sx={{ display: { lg: 'none' } }}
+            >
+              <ListItemIcon>
+                <Icon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{label}</ListItemText>
             </MenuItem>
-            <MenuItem onClick={handleClose}>
-              <Settings />
-              <Typography sx={{ ml: 1 }}>Settings</Typography>
-            </MenuItem>
-            <MenuItem onClick={handleClose}>
-              <Typography sx={{ ml: 1 }}>Logout</Typography>
-            </MenuItem>
-          </Menu>
-        </Box>
+          ))}
+          <Divider sx={{ display: { lg: 'none' } }} />
+          <MenuItem onClick={() => goTo('/')}>
+            <ListItemIcon>
+              <SwapHoriz fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary="Change business type"
+              secondary={businessType ? `Currently: ${businessType.name}` : undefined}
+            />
+          </MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );
