@@ -24,7 +24,7 @@ import {
   SwapHoriz,
   Logout,
 } from '@mui/icons-material';
-import { useBusinessType } from '../utils/BusinessTypeContext';
+import { useBusinessType } from '../utils/useBusinessType';
 import { useAuth } from '../context/auth';
 
 const NAV_ITEMS = [

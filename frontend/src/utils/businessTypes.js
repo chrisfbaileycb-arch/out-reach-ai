@@ -123,32 +123,3 @@ export const BUSINESS_TYPES = [
 ].map((type) => ({ ...type, templates: TEMPLATES_BY_TYPE[type.id] }));
 
 export const getBusinessType = (id) => BUSINESS_TYPES.find((type) => type.id === id);
-
-// Persisted in localStorage until accounts are wired to the backend.
-// Storage can throw (private mode, blocked site data), so fail soft: the
-// selection still holds for the session via BusinessTypeContext.
-const STORAGE_KEY = 'businessType';
-
-export const loadBusinessTypeId = () => {
-  try {
-    return getBusinessType(localStorage.getItem(STORAGE_KEY))?.id ?? null;
-  } catch {
-    return null;
-  }
-};
-
-export const saveBusinessTypeId = (id) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, id);
-  } catch {
-    // Not persisted; still held in memory for this session
-  }
-};
-
-export const clearBusinessTypeId = () => {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // Nothing stored to clear
-  }
-};

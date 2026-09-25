@@ -3,9 +3,10 @@ const BUSINESS_TYPES = require('../config/businessTypes');
 
 // Business Schema
 const businessSchema = new mongoose.Schema({
+  // Optional until the Settings page collects it; onboarding only asks for the type
   name: {
     type: String,
-    required: true,
+    trim: true,
   },
   type: {
     type: String,
@@ -23,10 +24,12 @@ const businessSchema = new mongoose.Schema({
     phone: String,
     website: String,
   },
+  // One business per owner for now
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
+    unique: true,
   },
   createdAt: {
     type: Date,

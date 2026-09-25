@@ -242,7 +242,7 @@ const LandingPage = () => {
             to="/register"
             sx={{ px: 4, py: 1.5 }}
           >
-            Start Your Free Trial
+            Create Your Free Account
           </Button>
         </Container>
       </Box>

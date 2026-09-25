@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import DynamicDashboard from '../components/DynamicDashboard';
-import { useBusinessType } from '../utils/BusinessTypeContext';
+import { useBusinessType } from '../utils/useBusinessType';
 
 // The dashboard only makes sense once a business type has been chosen
 const Dashboard = () => {

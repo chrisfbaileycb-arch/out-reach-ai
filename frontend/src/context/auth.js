@@ -1,6 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import api, { getErrorMessage, setAuthToken } from '../utils/api';
-import { useBusinessType } from '../utils/BusinessTypeContext';
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
@@ -33,7 +32,6 @@ const storeSession = (session) => {
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const { clearBusinessType } = useBusinessType();
   const [session, setSessionState] = useState(() => {
     const stored = readStoredSession();
     setAuthToken(stored?.token ?? null);
@@ -49,10 +47,13 @@ export const AuthProvider = ({ children }) => {
     setSessionState(next);
   }, []);
 
-  const logout = useCallback(() => {
-    setSession(null);
-    clearBusinessType();
-  }, [setSession, clearBusinessType]);
+  const logout = useCallback(() => setSession(null), [setSession]);
+
+  // Merge changes into the signed-in user, e.g. a newly chosen business type
+  const updateUser = useCallback(
+    (changes) => setSession({ ...session, user: { ...session.user, ...changes } }),
+    [session, setSession]
+  );
 
   // Confirm a stored session is still valid, and pick up profile changes
   useEffect(() => {
@@ -104,13 +105,7 @@ export const AuthProvider = ({ children }) => {
 
   // Stable identities so pages can safely use them in effect dependencies
   const login = useCallback((formData) => authenticate('/api/auth/login', formData), [authenticate]);
-  const register = useCallback(
-    (formData) => {
-      clearBusinessType(); // A new account starts by choosing its business type
-      return authenticate('/api/auth/register', formData);
-    },
-    [authenticate, clearBusinessType]
-  );
+  const register = useCallback((formData) => authenticate('/api/auth/register', formData), [authenticate]);
   const clearErrors = useCallback(() => setError(null), []);
 
   const value = useMemo(
@@ -122,9 +117,10 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       logout,
+      updateUser,
       clearErrors,
     }),
-    [session, loading, error, login, register, logout, clearErrors]
+    [session, loading, error, login, register, logout, updateUser, clearErrors]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

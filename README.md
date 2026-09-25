@@ -34,7 +34,8 @@ backend/
 ├── models/index.js           # Business, Customer, Campaign, User schemas
 ├── routes/
 │   ├── auth.js               # POST /api/auth/register, /login; GET /api/auth (current user)
-│   └── business.js, campaign.js, customer.js, analytics.js   # PLACEHOLDERS (501)
+│   ├── business.js           # PUT /api/business/me (business type); rest is a PLACEHOLDER (501)
+│   └── campaign.js, customer.js, analytics.js   # PLACEHOLDERS (501)
 └── __tests__/auth.test.js
 
 frontend/src/
@@ -58,7 +59,7 @@ frontend/src/
 └── utils/
     ├── api.js                # axios client: auth header, same-origin URLs
     ├── businessTypes.js      # single source of truth for business types
-    ├── BusinessTypeContext.js
+    ├── useBusinessType.js    # the signed-in user's business type (saved on their account)
     └── templates.js          # outreach message templates per business type
 ```
 

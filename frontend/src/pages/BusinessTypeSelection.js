@@ -10,18 +10,30 @@ import {
   Button,
   Radio,
   RadioGroup,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import { BUSINESS_TYPES } from '../utils/businessTypes';
-import { useBusinessType } from '../utils/BusinessTypeContext';
+import { useBusinessType } from '../utils/useBusinessType';
+import { getErrorMessage } from '../utils/api';
 
 const BusinessTypeSelection = () => {
   const navigate = useNavigate();
   const { businessType: current, selectBusinessType } = useBusinessType();
   const [selectedId, setSelectedId] = useState(current?.id ?? '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleContinue = () => {
-    selectBusinessType(selectedId);
-    navigate('/dashboard');
+  const handleContinue = async () => {
+    setSaving(true);
+    setError('');
+    try {
+      await selectBusinessType(selectedId);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Could not save your business type. Please try again.'));
+      setSaving(false);
+    }
   };
 
   return (
@@ -77,9 +89,20 @@ const BusinessTypeSelection = () => {
         </Grid>
       </RadioGroup>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button variant="contained" size="large" onClick={handleContinue} disabled={!selectedId}>
-          Continue
+        <Button
+          variant="contained"
+          size="large"
+          onClick={handleContinue}
+          disabled={!selectedId || saving}
+          sx={{ minWidth: 140 }}
+        >
+          {saving ? <CircularProgress size={24} aria-label="Saving" /> : 'Continue'}
         </Button>
       </Box>
     </Box>

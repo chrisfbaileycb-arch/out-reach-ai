@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
-const { User } = require('../models');
+const { User, Business } = require('../models');
 const requireAuth = require('../middleware/auth');
 const router = express.Router();
 
@@ -10,16 +10,19 @@ const normalizeEmail = (email) =>
   typeof email === 'string' ? email.trim().toLowerCase() : '';
 
 const signToken = (user) =>
-  jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-// The user fields safe to send to the client (never the password hash)
-const toPublicUser = (user) => ({
+// The user fields safe to send to the client (never the password hash),
+// plus their business type so the app can open straight to their dashboard
+const toPublicUser = (user, business) => ({
   id: user._id,
   firstName: user.firstName,
   lastName: user.lastName,
   email: user.email,
-  business: user.business,
+  businessType: business?.type ?? null,
 });
+
+const findBusiness = (user) => Business.findOne({ owner: user._id });
 
 // Current user, used by the frontend to restore a session
 router.get('/', requireAuth, async (req, res) => {
@@ -28,7 +31,7 @@ router.get('/', requireAuth, async (req, res) => {
     if (!user) {
       return res.status(401).json({ message: 'Session expired. Please sign in again.' });
     }
-    res.json(toPublicUser(user));
+    res.json(toPublicUser(user, await findBusiness(user)));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -111,7 +114,7 @@ router.post('/login', async (req, res) => {
     
     res.json({
       token,
-      user: toPublicUser(user),
+      user: toPublicUser(user, await findBusiness(user)),
     });
   } catch (error) {
     console.error(error);

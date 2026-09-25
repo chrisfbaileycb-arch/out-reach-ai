@@ -10,6 +10,7 @@ import { BUSINESS_TYPES } from './utils/businessTypes';
 const api = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
+  put: vi.fn(),
   interceptors: { response: { use: vi.fn(() => 1), eject: vi.fn() } },
 }));
 vi.mock('./utils/api', async (importOriginal) => ({
@@ -18,15 +19,19 @@ vi.mock('./utils/api', async (importOriginal) => ({
   setAuthToken: vi.fn(),
 }));
 
-const USER = { id: '1', firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com' };
+const USER = { id: '1', firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com', businessType: null };
 const httpError = (status, message) => Object.assign(new Error(message), { response: { status, data: { message } } });
 
-const signedIn = (businessType) => {
+// A stored session whose account has the given business type (or none)
+const signedIn = (businessType = null) => {
+  const user = { ...USER, businessType };
   localStorage.setItem('token', 'stored-token');
-  localStorage.setItem('user', JSON.stringify(USER));
-  if (businessType) localStorage.setItem('businessType', businessType);
-  api.get.mockResolvedValue({ data: USER });
+  localStorage.setItem('user', JSON.stringify(user));
+  api.get.mockResolvedValue({ data: user });
 };
+
+const saveTypeSucceeds = () =>
+  api.put.mockImplementation(async (url, { type }) => ({ data: { businessType: type } }));
 
 const renderApp = (path = '/') => {
   window.history.pushState({}, '', path);
@@ -62,6 +67,7 @@ describe('signed out', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Fill Your Business With Local Customers');
     expect(screen.getByRole('link', { name: 'Get Started Free' })).toHaveAttribute('href', '/register');
     expect(screen.getByRole('link', { name: 'Sign In' })).toHaveAttribute('href', '/login');
+    expect(screen.getByRole('link', { name: 'Create Your Free Account' })).toHaveAttribute('href', '/register');
     BUSINESS_TYPES.forEach(({ name }) => expect(screen.getByText(name)).toBeInTheDocument());
   });
 
@@ -73,6 +79,7 @@ describe('signed out', () => {
   test('register leads to business type selection, then the dashboard', async () => {
     const user = userEvent.setup();
     api.post.mockResolvedValue({ data: { token: 'new-token', user: USER } });
+    saveTypeSucceeds();
     renderApp('/register');
 
     await user.type(screen.getByLabelText(/first name/i), 'Ada');
@@ -92,7 +99,9 @@ describe('signed out', () => {
 
     await user.click(screen.getByText('Pet Services'));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Pet Services Dashboard');
+    expect(await screen.findByRole('heading', { name: 'Pet Services Dashboard' })).toBeInTheDocument();
+    expect(api.put).toHaveBeenCalledWith('/api/business/me', { type: 'pets' });
+    expect(JSON.parse(localStorage.getItem('user')).businessType).toBe('pets');
   });
 
   test('failed sign in shows the server message', async () => {
@@ -148,7 +157,29 @@ describe('signed in', () => {
     expect(localStorage.getItem('token')).toBe('stored-token');
   });
 
-  test('change business type preselects the current one', async () => {
+  test('signing in to an account with a saved type opens its dashboard', async () => {
+    const user = userEvent.setup();
+    api.post.mockResolvedValue({ data: { token: 't', user: { ...USER, businessType: 'retail' } } });
+    renderApp('/login');
+    await user.type(screen.getByLabelText(/email/i), 'ada@example.com');
+    await user.type(screen.getByLabelText(/password/i), 'longenough');
+    await user.click(screen.getByRole('button', { name: 'Sign In' }));
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Retail Dashboard');
+  });
+
+  test('a failed save keeps the user on the picker with a message', async () => {
+    const user = userEvent.setup();
+    signedIn();
+    api.put.mockRejectedValue(httpError(500, 'Server error'));
+    renderApp('/onboarding');
+    await user.click(await screen.findByText('Retail'));
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Server error');
+    expect(screen.getByRole('heading', { name: /what type of business/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+  });
+
+  test('change business type preselects the current one and saves the new one', async () => {
     const user = userEvent.setup();
     signedIn('food');
     renderApp('/dashboard');
@@ -157,9 +188,14 @@ describe('signed in', () => {
     expect(within(item).getByText('Currently: Food & Dining')).toBeInTheDocument();
     await user.click(item);
     expect(screen.getByRole('radio', { name: 'Food & Dining' })).toBeChecked();
+
+    saveTypeSucceeds();
+    await user.click(screen.getByText('Health & Wellness'));
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(await screen.findByRole('heading', { name: 'Health & Wellness Dashboard' })).toBeInTheDocument();
   });
 
-  test('log out clears the session and business type', async () => {
+  test('log out clears the session', async () => {
     const user = userEvent.setup();
     signedIn('food');
     renderApp('/dashboard');
@@ -167,6 +203,6 @@ describe('signed in', () => {
     await user.click(screen.getByRole('menuitem', { name: /log out/i }));
     expect(await screen.findByRole('heading', { name: 'Sign In to LocalBoost' })).toBeInTheDocument();
     expect(localStorage.getItem('token')).toBeNull();
-    expect(localStorage.getItem('businessType')).toBeNull();
+    expect(localStorage.getItem('user')).toBeNull();
   });
 });
