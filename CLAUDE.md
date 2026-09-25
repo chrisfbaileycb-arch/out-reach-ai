@@ -17,14 +17,16 @@ Run the relevant tests and lint before committing. CI (`.github/workflows/ci.yml
 
 - **Business types have one source of truth:** `frontend/src/utils/businessTypes.js`. Never add a `switch (businessType)` anywhere; read the registry instead. A new type needs an entry there, a template set in `utils/templates.js` and its id in `backend/config/businessTypes.js`. `businessTypes.test.js` fails until all three agree.
 - **Read the selected type with `useBusinessType()`**, not `localStorage` directly.
+- **Auth state comes from `useAuth()`** (`src/context/auth.js`). Call the backend through `src/utils/api.js`, which attaches the token and uses same-origin URLs. Don't use raw `axios` or read the token from storage.
+- **Routing:** signed-in pages go inside the `ProtectedRoute` layout in `App.js`, which renders the Navbar. `PublicOnlyRoute` is the only place that decides where someone goes after signing in. Pages shouldn't navigate after `login`/`register`.
 - **Don't add dead UI.** Every button must go somewhere or do something. Unbuilt features use `components/ComingSoon.js`, and unbuilt API routes return 501.
 - **Label placeholder data as sample data** in the UI. Never present made-up numbers as real.
-- **Auth:** the server refuses to start without `JWT_SECRET`, and that must stay true. Never add a fallback secret. Only return users through `toPublicUser()` in `routes/auth.js`.
+- **Auth:** the server refuses to start without `JWT_SECRET`, and that must stay true. Never add a fallback secret. Only return users through `toPublicUser()` in `routes/auth.js`. Protect API routes with `middleware/auth.js`.
 - **Match the existing style:** functional components, MUI `sx` for styling, 2-space indentation, single quotes. Frontend `.js` files contain JSX (Vite is configured for that).
 
 ## Not built yet
 
 - Business, campaign, customer and analytics APIs (placeholder 501 routes).
 - The Customer Acquisition, Loyalty, Events, Analytics and Settings pages (`ComingSoon`).
-- Login/register UI. The frontend doesn't call the backend yet.
-- The business type is stored in the browser only; it should move onto the `Business` record once auth is wired up.
+- The business type is stored in the browser only and cleared on logout, so users choose it again after each sign-in. It should move onto the `Business` record (needs the business API).
+- Password reset, and email verification.

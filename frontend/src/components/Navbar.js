@@ -22,8 +22,10 @@ import {
   Assessment,
   Settings,
   SwapHoriz,
+  Logout,
 } from '@mui/icons-material';
 import { useBusinessType } from '../utils/BusinessTypeContext';
+import { useAuth } from '../context/auth';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', icon: Dashboard, path: '/dashboard' },
@@ -38,6 +40,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { businessType } = useBusinessType();
+  const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const goTo = (path) => {
@@ -51,7 +54,7 @@ const Navbar = () => {
         <Typography
           variant="h6"
           component={RouterLink}
-          to={businessType ? '/dashboard' : '/'}
+          to="/dashboard"
           sx={{ flexGrow: 1, color: 'inherit', textDecoration: 'none' }}
         >
           LocalBoost
@@ -108,7 +111,7 @@ const Navbar = () => {
             </MenuItem>
           ))}
           <Divider sx={{ display: { lg: 'none' } }} />
-          <MenuItem onClick={() => goTo('/')}>
+          <MenuItem onClick={() => goTo('/onboarding')}>
             <ListItemIcon>
               <SwapHoriz fontSize="small" />
             </ListItemIcon>
@@ -116,6 +119,17 @@ const Navbar = () => {
               primary="Change business type"
               secondary={businessType ? `Currently: ${businessType.name}` : undefined}
             />
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              logout();
+            }}
+          >
+            <ListItemIcon>
+              <Logout fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Log out" secondary={user?.email} />
           </MenuItem>
         </Menu>
       </Toolbar>

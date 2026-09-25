@@ -7,7 +7,7 @@ import { useBusinessType } from '../utils/BusinessTypeContext';
 const Dashboard = () => {
   const { businessType } = useBusinessType();
   if (!businessType) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/onboarding" replace />;
   }
   return <DynamicDashboard businessType={businessType} />;
 };

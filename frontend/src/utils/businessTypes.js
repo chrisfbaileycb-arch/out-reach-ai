@@ -144,3 +144,11 @@ export const saveBusinessTypeId = (id) => {
     // Not persisted; still held in memory for this session
   }
 };
+
+export const clearBusinessTypeId = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Nothing stored to clear
+  }
+};

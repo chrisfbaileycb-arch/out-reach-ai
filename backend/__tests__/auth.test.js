@@ -10,6 +10,7 @@ jest.mock('../models', () => {
     Object.assign(this, doc, { _id: String(users.length + 1) });
   }
   User.findOne = async ({ email }) => users.find((u) => u.email === email) || null;
+  User.findById = async (id) => users.find((u) => u._id === id) || null;
   User.prototype.save = async function () {
     users.push(this);
   };
@@ -51,6 +52,20 @@ test('register and login validate input', async () => {
   expect((await register({ ...valid, email: 'not-an-email' })).status).toBe(400);
   expect((await register({ ...valid, email: 'a@b.com', password: 'short' })).status).toBe(400);
   expect((await login({})).status).toBe(400);
+});
+
+test('GET /api/auth returns the signed-in user', async () => {
+  const { token } = (await login({ email: 'ada@example.com', password: 'longenough' })).body;
+  const res = await request(app).get('/api/auth').set('Authorization', `Bearer ${token}`);
+  expect(res.status).toBe(200);
+  expect(res.body).toEqual({ id: '1', firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com' });
+});
+
+test('GET /api/auth rejects missing, invalid and orphaned tokens', async () => {
+  expect((await request(app).get('/api/auth')).status).toBe(401);
+  expect((await request(app).get('/api/auth').set('Authorization', 'Bearer nope')).status).toBe(401);
+  const orphan = jwt.sign({ userId: '999' }, 'test-secret');
+  expect((await request(app).get('/api/auth').set('Authorization', `Bearer ${orphan}`)).status).toBe(401);
 });
 
 test('malformed JSON gets a JSON 400', async () => {

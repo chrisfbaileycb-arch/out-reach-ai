@@ -30,25 +30,33 @@ Checks (all run in CI on every push):
 backend/
 ├── server.js                 # Express app, Mongo connection, route mounting
 ├── config/businessTypes.js   # business type ids (must match the frontend registry)
+├── middleware/auth.js        # requires a valid Bearer token
 ├── models/index.js           # Business, Customer, Campaign, User schemas
 ├── routes/
-│   ├── auth.js               # POST /api/auth/register, /api/auth/login
+│   ├── auth.js               # POST /api/auth/register, /login; GET /api/auth (current user)
 │   └── business.js, campaign.js, customer.js, analytics.js   # PLACEHOLDERS (501)
 └── __tests__/auth.test.js
 
 frontend/src/
 ├── App.js                    # routes
 ├── theme.js
+├── context/auth.js           # sign in/up/out, session restore
 ├── components/
 │   ├── Navbar.js
+│   ├── ProtectedRoute.js     # signed-in layout; sends visitors to /login
+│   ├── PublicOnlyRoute.js    # sends signed-in users on from /, /login, /register
+│   ├── AuthFormLayout.js     # shared sign-in/sign-up frame
 │   ├── DynamicDashboard.js   # dashboard for the chosen business type
 │   └── ComingSoon.js         # shared layout for unbuilt pages
 ├── pages/
-│   ├── BusinessTypeSelection.js   # "/" onboarding
-│   ├── Dashboard.js               # "/dashboard"; sends you to "/" if no type is chosen
+│   ├── LandingPage.js             # "/"
+│   ├── Login.js, Register.js
+│   ├── BusinessTypeSelection.js   # "/onboarding"
+│   ├── Dashboard.js               # "/dashboard"; asks for a business type if none is chosen
 │   └── CustomerAcquisition.js, LoyaltyProgram.js, EventPromotion.js,
 │       Analytics.js, Settings.js  # PLACEHOLDERS (ComingSoon)
 └── utils/
+    ├── api.js                # axios client: auth header, same-origin URLs
     ├── businessTypes.js      # single source of truth for business types
     ├── BusinessTypeContext.js
     └── templates.js          # outreach message templates per business type

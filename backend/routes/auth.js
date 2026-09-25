@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const { User } = require('../models');
+const requireAuth = require('../middleware/auth');
 const router = express.Router();
 
 const normalizeEmail = (email) =>
@@ -18,6 +19,20 @@ const toPublicUser = (user) => ({
   lastName: user.lastName,
   email: user.email,
   business: user.business,
+});
+
+// Current user, used by the frontend to restore a session
+router.get('/', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(401).json({ message: 'Session expired. Please sign in again.' });
+    }
+    res.json(toPublicUser(user));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 // Register
